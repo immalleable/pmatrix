@@ -30,3 +30,4 @@ cmatrix.exe
 *.core
 CMakeCache.txt
 CMakeFiles/
+pmatrix

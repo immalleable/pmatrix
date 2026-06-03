@@ -1,6 +1,31 @@
-<h1 align="center">CMatrix</h1>
+<h1 align="center">PMatrix</h1>
 
-<h3 align="center"> Matrix like effect in your terminal </h3>
+<h3 align="center"> Matrix rain + Pomodoro timer in your terminal </h3>
+
+<p align="center">
+The rain falls while you work. When your pomodoro ends, the rain <b>freezes</b>
+and a break countdown appears. When the break is over, the rain falls again.
+</p>
+
+## Pomodoro usage
+
+```sh
+pmatrix              # 25 min work / 5 min break (defaults)
+pmatrix -W 50 -R 10  # 50 min work / 10 min break
+pmatrix -W 0         # disable pomodoro (plain cmatrix behaviour)
+```
+
+While running:
+- a small `#N MM:SS` countdown HUD sits in the top-right corner during work
+- at break time the rain freezes and a centered `BREAK MM:SS` banner shows
+- press `s` to skip to the next phase, `q` to quit
+
+PMatrix is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix) by
+Chris Allegretta and Abishek V Ashok, and stays under the same GPL-3.0 license.
+Everything below is the original CMatrix documentation (the binary is named
+`pmatrix`).
+
+---
 
 </p>
 <p align="center">

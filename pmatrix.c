@@ -1,6 +1,9 @@
 /*
-    cmatrix.c
+    pmatrix.c — cmatrix with a built-in Pomodoro timer.
+    The rain falls while you work, freezes during breaks, and
+    resumes when the break is over.
 
+    Based on cmatrix (https://github.com/abishekvashok/cmatrix):
     Copyright (C) 1999-2017 Chris Allegretta
     Copyright (C) 2017-Present Abishek V Ashok
 
@@ -147,7 +150,9 @@ void c_die(char *msg, ...) {
 }
 
 void usage(void) {
-    printf(" Usage: cmatrix -[abBcfhlsmVxk] [-u delay] [-C color] [-t tty] [-M message]\n");
+    printf(" Usage: pmatrix -[abBcfhlsmVxk] [-u delay] [-C color] [-t tty] [-M message] [-W mins] [-R mins]\n");
+    printf(" -W [mins]: Pomodoro work duration in minutes (default 25, 0 disables pomodoro)\n");
+    printf(" -R [mins]: Pomodoro break (rest) duration in minutes (default 5)\n");
     printf(" -a: Asynchronous scroll\n");
     printf(" -b: Bold characters on\n");
     printf(" -B: All bold characters (overrides -b)\n");
@@ -171,10 +176,10 @@ void usage(void) {
 }
 
 void version(void) {
-    printf(" CMatrix version %s (compiled %s, %s)\n",
+    printf(" PMatrix version %s (compiled %s, %s)\n",
         VERSION, __TIME__, __DATE__);
-    printf("Email: abishekvashok@gmail.com\n");
-    printf("Web: https://github.com/abishekvashok/cmatrix\n");
+    printf("Web: https://github.com/immalleable/pmatrix\n");
+    printf("Based on CMatrix: https://github.com/abishekvashok/cmatrix\n");
 }
 
 
@@ -334,12 +339,21 @@ int main(int argc, char *argv[]) {
     char *msg = "";
     char *tty = NULL;
 
+    /* Pomodoro state */
+    int pomodoro = 1;          /* on by default; -W 0 disables */
+    int work_secs = 25 * 60;   /* -W minutes */
+    int break_secs = 5 * 60;   /* -R minutes */
+    int in_break = 0;
+    int pomo_count = 1;
+    int rem_secs = 0;
+    time_t phase_start;
+
     srand((unsigned) time(NULL));
     setlocale(LC_ALL, "");
 
     /* Many thanks to morph- (morph@jmss.com) for this getopt patch */
     opterr = 0;
-    while ((optchr = getopt(argc, argv, "abBcfhlLnrosmxkVM:u:C:t:")) != EOF) {
+    while ((optchr = getopt(argc, argv, "abBcfhlLnrosmxkVM:u:C:t:W:R:")) != EOF) {
         switch (optchr) {
         case 's':
             screensaver = 1;
@@ -427,6 +441,18 @@ int main(int argc, char *argv[]) {
             break;
         case 't':
             tty = optarg;
+            break;
+        case 'W':
+            work_secs = atoi(optarg) * 60;
+            if (work_secs <= 0) {
+                pomodoro = 0;
+            }
+            break;
+        case 'R':
+            break_secs = atoi(optarg) * 60;
+            if (break_secs <= 0) {
+                break_secs = 60;
+            }
             break;
         }
     }
@@ -540,6 +566,8 @@ if (console) {
 
     var_init();
 
+    phase_start = time(NULL);
+
     while (1) {
 #ifndef _WIN32
         /* Check for signals */
@@ -562,6 +590,22 @@ if (console) {
         count++;
         if (count > 4) {
             count = 1;
+        }
+
+        /* Pomodoro phase bookkeeping: when the current phase runs out,
+           flip between work (rain falls) and break (rain freezes). */
+        if (pomodoro) {
+            rem_secs = (in_break ? break_secs : work_secs)
+                - (int) (time(NULL) - phase_start);
+            if (rem_secs <= 0) {
+                if (in_break) {
+                    pomo_count++;
+                }
+                in_break = !in_break;
+                phase_start = time(NULL);
+                rem_secs = in_break ? break_secs : work_secs;
+                beep();
+            }
         }
 
         if ((keypress = wgetch(stdscr)) != ERR) {
@@ -653,12 +697,24 @@ if (console) {
                 case 'P':
                     pause = (pause == 0)?1:0;
                     break;
+                case 's':
+                    /* Skip to the next pomodoro phase */
+                    if (pomodoro) {
+                        if (in_break)
+                            pomo_count++;
+                        in_break = !in_break;
+                        phase_start = time(NULL);
+                        rem_secs = in_break ? break_secs : work_secs;
+                        beep();
+                    }
+                    break;
 
                 }
             }
         }
         for (j = 0; j <= COLS - 1; j += 2) {
-            if ((count > updates[j] || asynch == 0) && pause == 0) {
+            if ((count > updates[j] || asynch == 0) && pause == 0
+                && !(pomodoro && in_break)) {
 
                 /* I don't like old-style scrolling, yuck */
                 if (oldstyle) {
@@ -886,6 +942,49 @@ if (console) {
             move(msg_x+1, msg_y-2);
             for (i = 0; i < strlen(msg)+4; i++)
                 addch(' ');
+        }
+
+        /* Pomodoro overlay */
+        if (pomodoro) {
+            char hud[64];
+            size_t k;
+            if (in_break) {
+                /* Rain is frozen: show a centered break banner */
+                const char *sub = " rain resumes after break - press 's' to skip ";
+                int hud_x = LINES / 2;
+                int hud_y;
+                snprintf(hud, sizeof(hud), "BREAK  %02d:%02d",
+                         rem_secs / 60, rem_secs % 60);
+                hud_y = COLS / 2 - (int) strlen(hud) / 2;
+                attron(COLOR_PAIR(COLOR_WHITE));
+                attron(A_BOLD);
+                move(hud_x - 1, hud_y - 2);
+                for (k = 0; k < strlen(hud) + 4; k++)
+                    addch(' ');
+                move(hud_x, hud_y - 2);
+                addch(' ');
+                addch(' ');
+                addstr(hud);
+                addch(' ');
+                addch(' ');
+                move(hud_x + 1, hud_y - 2);
+                for (k = 0; k < strlen(hud) + 4; k++)
+                    addch(' ');
+                attroff(A_BOLD);
+                move(hud_x + 2, COLS / 2 - (int) strlen(sub) / 2);
+                addstr(sub);
+                attroff(COLOR_PAIR(COLOR_WHITE));
+            } else {
+                /* Working: small countdown HUD in the top-right corner */
+                snprintf(hud, sizeof(hud), " #%d %02d:%02d ",
+                         pomo_count, rem_secs / 60, rem_secs % 60);
+                attron(COLOR_PAIR(COLOR_WHITE));
+                attron(A_BOLD);
+                move(0, COLS - (int) strlen(hud) - 1);
+                addstr(hud);
+                attroff(A_BOLD);
+                attroff(COLOR_PAIR(COLOR_WHITE));
+            }
         }
 
         napms(update * 10);

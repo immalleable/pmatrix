@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-project(CMatrix LANGUAGES C)
+project(PMatrix LANGUAGES C)
 set(VERSION "2.0")
 
 include(GNUInstallDirs)
@@ -64,11 +64,11 @@ if (HAVE_USE_DEFAULT_COLORS)
     add_definitions(-DHAVE_USE_DEFAULT_COLORS)
 endif()
 
-add_executable(cmatrix cmatrix.c)
+add_executable(pmatrix pmatrix.c)
 
-target_link_libraries(cmatrix ${CURSES_LIBRARIES})
+target_link_libraries(pmatrix ${CURSES_LIBRARIES})
 
-install(TARGETS cmatrix DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS pmatrix DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES cmatrix.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if     (UNIX)
