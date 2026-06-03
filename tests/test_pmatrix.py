@@ -88,6 +88,23 @@ if "POMODORO #1" in t:
     failures.append("break: work HUD residue still on screen")
 print(f"[break] title={'B R E A K' in t}  center-clock-cells={len(mid)}")
 
+# --- Phase 2b: space pauses the break clock too ---
+os.write(fd, b" ")
+pump(0.8)
+b1 = text()
+if "P A U S E D" not in b1:
+    failures.append("break-pause: P A U S E D title missing")
+pump(1.3)  # > 1s: break countdown would tick if not frozen
+b2 = text()
+if b1 != b2:
+    failures.append("break-pause: screen changed while paused (break clock not frozen)")
+os.write(fd, b" ")  # resume break
+pump(1.3)
+b3 = text()
+if "B R E A K" not in b3:
+    failures.append("break-pause: B R E A K title not restored after resume")
+print(f"[break-pause] title={'P A U S E D' in b1}  frozen={b1 == b2}  resumed={'B R E A K' in b3}")
+
 # --- Phase 3: skip back to work, check residue ---
 os.write(fd, b"s")
 pump(2.0)
