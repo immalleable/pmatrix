@@ -315,6 +315,70 @@ void resize_screen(void) {
     refresh();
 }
 
+/* 3x5 pixel font for the big pomodoro clock ('0'-'9' and ':') */
+static const char *bigfont[11][5] = {
+    {"###","# #","# #","# #","###"}, /* 0 */
+    {" # "," # "," # "," # "," # "}, /* 1 */
+    {"###","  #","###","#  ","###"}, /* 2 */
+    {"###","  #","###","  #","###"}, /* 3 */
+    {"# #","# #","###","  #","  #"}, /* 4 */
+    {"###","#  ","###","  #","###"}, /* 5 */
+    {"###","#  ","###","# #","###"}, /* 6 */
+    {"###","  #","  #","  #","  #"}, /* 7 */
+    {"###","# #","###","# #","###"}, /* 8 */
+    {"###","# #","###","  #","###"}, /* 9 */
+    {" ","#"," ","#"," "},           /* : */
+};
+
+/* Pixels are drawn 2 columns wide so the blocks look roughly square */
+#define BIGFONT_SCALE_X 2
+#define BIGFONT_ROWS 5
+
+int big_text_width(const char *s) {
+    int w = 0;
+    const char *p;
+    for (p = s; *p; p++) {
+        int idx = (*p == ':') ? 10 : *p - '0';
+        w += ((int) strlen(bigfont[idx][0]) + 1) * BIGFONT_SCALE_X;
+    }
+    return w - BIGFONT_SCALE_X; /* drop the trailing gap */
+}
+
+/* Draw s (digits and ':' only) as big reverse-video blocks at (y, x) */
+void draw_big_text(int y, int x, const char *s) {
+    int row, k, r, px;
+    const char *p;
+
+    for (row = 0; row < BIGFONT_ROWS; row++) {
+        int cx = x;
+        if (y + row < 0 || y + row >= LINES) {
+            continue;
+        }
+        for (p = s; *p; p++) {
+            int idx = (*p == ':') ? 10 : *p - '0';
+            const char *line = bigfont[idx][row];
+            /* character pixels plus one trailing gap column */
+            for (k = 0; k <= (int) strlen(line); k++) {
+                for (r = 0; r < BIGFONT_SCALE_X; r++) {
+                    px = cx + k * BIGFONT_SCALE_X + r;
+                    if (px < 0 || px >= COLS) {
+                        continue;
+                    }
+                    move(y + row, px);
+                    if (k < (int) strlen(line) && line[k] == '#') {
+                        attron(A_REVERSE);
+                        addch(' ');
+                        attroff(A_REVERSE);
+                    } else {
+                        addch(' ');
+                    }
+                }
+            }
+            cx += ((int) strlen(line) + 1) * BIGFONT_SCALE_X;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     int i, y, z, optchr, keypress;
     int j = 0;
@@ -604,6 +668,7 @@ if (console) {
                 in_break = !in_break;
                 phase_start = time(NULL);
                 rem_secs = in_break ? break_secs : work_secs;
+                clear(); /* wipe overlay leftovers from the old phase */
                 beep();
             }
         }
@@ -705,6 +770,7 @@ if (console) {
                         in_break = !in_break;
                         phase_start = time(NULL);
                         rem_secs = in_break ? break_secs : work_secs;
+                        clear(); /* wipe overlay leftovers from the old phase */
                         beep();
                     }
                     break;
@@ -946,42 +1012,61 @@ if (console) {
 
         /* Pomodoro overlay */
         if (pomodoro) {
-            char hud[64];
-            size_t k;
+            char clock[16];
+            int bw, row2, col2;
+            snprintf(clock, sizeof(clock), "%02d:%02d",
+                     rem_secs / 60, rem_secs % 60);
+            bw = big_text_width(clock);
             if (in_break) {
-                /* Rain is frozen: show a centered break banner */
-                const char *sub = " rain resumes after break - press 's' to skip ";
-                int hud_x = LINES / 2;
-                int hud_y;
-                snprintf(hud, sizeof(hud), "BREAK  %02d:%02d",
-                         rem_secs / 60, rem_secs % 60);
-                hud_y = COLS / 2 - (int) strlen(hud) / 2;
+                /* Rain is frozen: big centered break clock */
+                const char *title = "B R E A K";
+                const char *sub = "rain resumes after break - press 's' to skip";
+                int top = LINES / 2 - 5;
+                int left = COLS / 2 - bw / 2;
+                if (top < 0)
+                    top = 0;
                 attron(COLOR_PAIR(COLOR_WHITE));
+                /* clear a margin around the banner */
+                for (row2 = top - 1; row2 <= top + BIGFONT_ROWS + 4; row2++) {
+                    if (row2 < 0 || row2 >= LINES)
+                        continue;
+                    for (col2 = left - 4; col2 <= left + bw + 3; col2++) {
+                        if (col2 < 0 || col2 >= COLS)
+                            continue;
+                        move(row2, col2);
+                        addch(' ');
+                    }
+                }
                 attron(A_BOLD);
-                move(hud_x - 1, hud_y - 2);
-                for (k = 0; k < strlen(hud) + 4; k++)
-                    addch(' ');
-                move(hud_x, hud_y - 2);
-                addch(' ');
-                addch(' ');
-                addstr(hud);
-                addch(' ');
-                addch(' ');
-                move(hud_x + 1, hud_y - 2);
-                for (k = 0; k < strlen(hud) + 4; k++)
-                    addch(' ');
+                move(top, COLS / 2 - (int) strlen(title) / 2);
+                addstr(title);
+                draw_big_text(top + 2, left, clock);
                 attroff(A_BOLD);
-                move(hud_x + 2, COLS / 2 - (int) strlen(sub) / 2);
+                move(top + BIGFONT_ROWS + 3,
+                     COLS / 2 - (int) strlen(sub) / 2);
                 addstr(sub);
                 attroff(COLOR_PAIR(COLOR_WHITE));
             } else {
-                /* Working: small countdown HUD in the top-right corner */
-                snprintf(hud, sizeof(hud), " #%d %02d:%02d ",
-                         pomo_count, rem_secs / 60, rem_secs % 60);
+                /* Working: big countdown clock in the top-right corner */
+                char label[24];
+                int left = COLS - bw - 2;
+                snprintf(label, sizeof(label), "POMODORO #%d", pomo_count);
                 attron(COLOR_PAIR(COLOR_WHITE));
+                /* clear behind the HUD */
+                for (row2 = 0; row2 <= BIGFONT_ROWS + 2; row2++) {
+                    if (row2 >= LINES)
+                        continue;
+                    for (col2 = left - 2; col2 < COLS; col2++) {
+                        if (col2 < 0)
+                            continue;
+                        move(row2, col2);
+                        addch(' ');
+                    }
+                }
                 attron(A_BOLD);
-                move(0, COLS - (int) strlen(hud) - 1);
-                addstr(hud);
+                move(0, COLS - (int) strlen(label) - 2);
+                addstr(label);
+                draw_big_text(2, left, clock);
                 attroff(A_BOLD);
                 attroff(COLOR_PAIR(COLOR_WHITE));
             }
