@@ -53,6 +53,25 @@ if not any(y <= 7 and x > COLS // 2 for y, x in rv):
     failures.append("work: no big clock blocks in top-right corner")
 print(f"[work]  label={'POMODORO #1' in t}  big-clock-cells={len(rv)}")
 
+# --- Phase 1b: space pauses rain AND clock ---
+os.write(fd, b" ")
+pump(0.8)
+t1 = text()
+if "PAUSED #1" not in t1:
+    failures.append("pause: PAUSED #1 label missing")
+pump(1.3)  # > 1s so both rain and clock would visibly move if not frozen
+t2 = text()
+if t1 != t2:
+    failures.append("pause: screen changed while paused (rain or clock not frozen)")
+os.write(fd, b" ")  # resume
+pump(1.3)
+t3 = text()
+if "POMODORO #1" not in t3:
+    failures.append("pause: POMODORO #1 label not restored after resume")
+if t2 == t3:
+    failures.append("pause: screen identical after resume (rain did not restart)")
+print(f"[pause] label={'PAUSED #1' in t1}  frozen={t1 == t2}  resumed={t2 != t3}")
+
 # --- Phase 2: skip into break ---
 os.write(fd, b"s")
 pump(1.5)

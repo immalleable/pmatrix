@@ -153,6 +153,7 @@ void usage(void) {
     printf(" Usage: pmatrix -[abBcfhlsmVxk] [-u delay] [-C color] [-t tty] [-M message] [-W mins] [-R mins]\n");
     printf(" -W [mins]: Pomodoro work duration in minutes (default 25, 0 disables pomodoro)\n");
     printf(" -R [mins]: Pomodoro break (rest) duration in minutes (default 5)\n");
+    printf(" Keys: space/p pause rain + clock, s skip phase, q quit\n");
     printf(" -a: Asynchronous scroll\n");
     printf(" -b: Bold characters on\n");
     printf(" -B: All bold characters (overrides -b)\n");
@@ -410,6 +411,7 @@ int main(int argc, char *argv[]) {
     int in_break = 0;
     int pomo_count = 1;
     int rem_secs = 0;
+    int pause_elapsed = 0; /* phase seconds already spent when paused */
     time_t phase_start;
 
     srand((unsigned) time(NULL));
@@ -659,6 +661,10 @@ if (console) {
         /* Pomodoro phase bookkeeping: when the current phase runs out,
            flip between work (rain falls) and break (rain freezes). */
         if (pomodoro) {
+            if (pause) {
+                /* Paused: slide phase_start forward so the clock freezes */
+                phase_start = time(NULL) - pause_elapsed;
+            }
             rem_secs = (in_break ? break_secs : work_secs)
                 - (int) (time(NULL) - phase_start);
             if (rem_secs <= 0) {
@@ -760,7 +766,11 @@ if (console) {
                     break;
                 case 'p':
                 case 'P':
+                case ' ': /* space: pause/resume rain and pomodoro clock */
                     pause = (pause == 0)?1:0;
+                    if (pause) {
+                        pause_elapsed = (int) (time(NULL) - phase_start);
+                    }
                     break;
                 case 's':
                     /* Skip to the next pomodoro phase */
@@ -1019,7 +1029,7 @@ if (console) {
             bw = big_text_width(clock);
             if (in_break) {
                 /* Rain is frozen: big centered break clock */
-                const char *title = "B R E A K";
+                const char *title = pause ? "P A U S E D" : "B R E A K";
                 const char *sub = "rain resumes after break - press 's' to skip";
                 int top = LINES / 2 - 5;
                 int left = COLS / 2 - bw / 2;
@@ -1050,7 +1060,11 @@ if (console) {
                 /* Working: big countdown clock in the top-right corner */
                 char label[24];
                 int left = COLS - bw - 2;
-                snprintf(label, sizeof(label), "POMODORO #%d", pomo_count);
+                if (pause) {
+                    snprintf(label, sizeof(label), "PAUSED #%d", pomo_count);
+                } else {
+                    snprintf(label, sizeof(label), "POMODORO #%d", pomo_count);
+                }
                 attron(COLOR_PAIR(COLOR_WHITE));
                 /* clear behind the HUD */
                 for (row2 = 0; row2 <= BIGFONT_ROWS + 2; row2++) {
