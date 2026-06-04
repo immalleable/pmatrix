@@ -773,6 +773,7 @@ if (console) {
                     }
                     break;
                 case 's':
+                case 'S':
                     /* Skip to the next pomodoro phase */
                     if (pomodoro) {
                         if (in_break)
