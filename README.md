@@ -13,6 +13,10 @@ falls again — so a glance at your terminal tells you whether it's time to focu
 </p>
 
 <p align="center">
+  <img src="./data/img/work-clock.png" alt="close-up of the big block-digit pomodoro clock over the rain" width="560">
+</p>
+
+<p align="center">
   <a href="./COPYING">
     <img src="https://img.shields.io/github/license/immalleable/pmatrix?color=blue">
   </a>
