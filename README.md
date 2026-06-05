@@ -9,6 +9,10 @@ falls again — so a glance at your terminal tells you whether it's time to focu
 </p>
 
 <p align="center">
+  <img src="./data/img/pmatrix-demo.gif" alt="pmatrix work phase: matrix rain with a big POMODORO countdown in the top-right corner" width="760">
+</p>
+
+<p align="center">
   <a href="./COPYING">
     <img src="https://img.shields.io/github/license/immalleable/pmatrix?color=blue">
   </a>
