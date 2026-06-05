@@ -1,7 +1,7 @@
 bin_PROGRAMS = pmatrix
 pmatrix_SOURCES = pmatrix.c
 
-man_MANS = cmatrix.1
+man_MANS = pmatrix.1
 
 if MATRIX_FONTS
 BUILD_FONTS = 1
@@ -11,7 +11,7 @@ endif
 
 EXTRA_DIST =	COPYING INSTALL install-sh \
 		missing mkinstalldirs matrix.fnt \
-		matrix.psf.gz mtx.pcf cmatrix.1 cmatrix.spec
+		matrix.psf.gz mtx.pcf pmatrix.1 cmatrix.spec
 
 install-data-local:
 	@if test $(BUILD_FONTS) = 1; then \

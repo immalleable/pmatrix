@@ -1,12 +1,27 @@
-.TH CMatrix 1 "Mon May 3 1999"
+.TH PMatrix 1 "June 2026"
 .SH NAME
-CMatrix
+pmatrix \- Matrix rain with a built-in Pomodoro timer
 .SH SYNOPSIS
-.B cmatrix
-[\-abBflohnsmVx] [\-u update] [\-C color]
+.B pmatrix
+[\-abBcfhlLnsmVxk] [\-u update] [\-C color] [\-t tty] [\-M message] [\-W mins] [\-R mins]
 .SH DESCRIPTION
-Shows a scrolling 'Matrix' like screen in Linux
+Shows a scrolling 'Matrix' like screen in the terminal, with a Pomodoro timer
+wired into the animation. During a work phase the rain falls and a large
+block-digit countdown is shown in the top-right corner. When the work phase
+ends the rain freezes and a centered break countdown takes over the screen;
+when the break ends the rain resumes and the next pomodoro begins. Pass
+.I "\-W 0"
+to disable the timer and get plain Matrix rain.
+.PP
+PMatrix is a fork of CMatrix by Chris Allegretta and Abishek V Ashok.
 .SS OPTIONS
+.TP
+.I "\-W mins"
+Pomodoro work duration in minutes (default 25). A value of 0 disables the
+Pomodoro timer.
+.TP
+.I "\-R mins"
+Pomodoro break (rest) duration in minutes (default 5).
 .TP
 .I "\-a"
 Asynchronous scroll
@@ -27,10 +42,10 @@ Linux mode (sets "matrix.fnt" font in console)
 Use old-style scrolling
 .TP
 .I "\-c"
-Only print the shadows of letters 
+Use Japanese characters as seen in the original matrix. Requires appropriate fonts
 .TP
 .I "\-L"
-Locks cmatrix, Unable to quit
+Lock mode (can be closed from another terminal)
 .TP
 .I "\-h, \-?"
 Print usage and exit
@@ -39,7 +54,7 @@ Print usage and exit
 "Rainbow" mode, rainbow colored character
 .TP
 .I "\-k"
-Every characters change 
+Characters change while scrolling
 .TP
 .I "\-n"
 No bold characters (overrides \-b and \-B)
@@ -57,20 +72,27 @@ X window mode, use if your xterm is using mtx.pcf
 Print version information and exit
 .TP
 .I "\-u delay"
-Screen update delay 0 - 9, default 4
+Screen update delay 0 - 10, default 4
 .TP
 .I "\-C color"
 Use this color for matrix (default green).
 Valid colors are green, red, blue, white, yellow, cyan, magenta and black.
 .TP
 .I "\-M message"
-Add a message in the center of cmatrix
+Add a message in the center of pmatrix
 .TP
 .I "\-t tty"
 Set tty to use
 .SS KEYSTROKES
 The following keystrokes are available during execution (unavailable in
 \-s mode)
+.TP
+.I "space, p, P"
+Pause/resume. During work this freezes the rain and the work clock; during a
+break it freezes the break countdown.
+.TP
+.I "s, S"
+Skip to the next Pomodoro phase (work -> break, or break -> next work)
 .TP
 .I "a"
 Toggle asynchronous scroll
@@ -98,4 +120,6 @@ Quit the program
 This program is very CPU intensive.  Don't be surprised if it eats up over
 40% of your CPU at times.
 .SH HOMEPAGE
-http://www.github.com/abishekvashok/cmatrix
+https://github.com/immalleable/pmatrix
+.SH SEE ALSO
+Based on CMatrix: https://github.com/abishekvashok/cmatrix

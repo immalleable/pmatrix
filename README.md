@@ -1,210 +1,160 @@
 <h1 align="center">PMatrix</h1>
 
-<h3 align="center"> Matrix rain + Pomodoro timer in your terminal </h3>
+<h3 align="center">Matrix rain + a Pomodoro timer, in your terminal</h3>
 
 <p align="center">
-The rain falls while you work. When your pomodoro ends, the rain <b>freezes</b>
-and a break countdown appears. When the break is over, the rain falls again.
+The green rain falls while you work. When the pomodoro ends the rain <b>freezes</b>
+and a big break countdown takes over the screen. When the break is over, the rain
+falls again — so a glance at your terminal tells you whether it's time to focus or rest.
 </p>
 
-## Pomodoro usage
-
-```sh
-pmatrix              # 25 min work / 5 min break (defaults)
-pmatrix -W 50 -R 10  # 50 min work / 10 min break
-pmatrix -W 0         # disable pomodoro (plain cmatrix behaviour)
-```
-
-While running:
-- a small `#N MM:SS` countdown HUD sits in the top-right corner during work
-- at break time the rain freezes and a centered `BREAK MM:SS` banner shows
-- press `s` to skip to the next phase, `q` to quit
-
-PMatrix is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix) by
-Chris Allegretta and Abishek V Ashok, and stays under the same GPL-3.0 license.
-Everything below is the original CMatrix documentation (the binary is named
-`pmatrix`).
-
----
-
-</p>
 <p align="center">
-  <a href="https://travis-ci.org/abishekvashok/cmatrix">
-    <img src="https://travis-ci.org/abishekvashok/cmatrix.svg?branch=master">
-  </a>
   <a href="./COPYING">
-    <img src="https://img.shields.io/github/license/abishekvashok/cmatrix?color=blue">
+    <img src="https://img.shields.io/github/license/immalleable/pmatrix?color=blue">
   </a>
   <img src="https://img.shields.io/badge/contributions-welcome-orange">
-  <a href="https://github.com/abishekvashok/cmatrix/stargazers">
-    <img src="https://img.shields.io/github/stars/abishekvashok/cmatrix">
+  <a href="https://github.com/immalleable/pmatrix/stargazers">
+    <img src="https://img.shields.io/github/stars/immalleable/pmatrix">
   </a>
-  <a href="https://github.com/abishekvashok/cmatrix/network">
-    <img src="https://img.shields.io/github/forks/abishekvashok/cmatrix">
+  <a href="https://github.com/immalleable/pmatrix/network">
+    <img src="https://img.shields.io/github/forks/immalleable/pmatrix">
   </a>
 </p>
-
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## Contents
-- [Overview](#overview)
-- [Build Dependencies](#build-dependencies)
-- [Building and Installation](#building-and-installing-cmatrix)
-    - [Using configure (recommended)](#using-configure-(recommended-for-most-linux%2Fmingw-users))
-    - [Using CMake](#using-cmake)
-- [Usage](#usage)
-- [Captures](#captures)
-    - [Screenshots](#screenshots)
-    - [Screencasts](#screencasts)
-- [Maintainer](#maintainers)
-    - [Contributors](#our-contributors)
-- [Contribution Guide](#contribution-guide)
-- [License](#license)
+- [Overview](#cloud-overview)
+- [Pomodoro usage](#tomato-pomodoro-usage)
+- [Build dependencies](#open_file_folder-build-dependencies)
+- [Building and installing](#floppy_disk-building-and-installing)
+- [All options](#bookmark_tabs-all-options)
+- [Credits](#busts_in_silhouette-credits)
+- [License](#page_facing_up-license)
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## :cloud: Overview
 
-CMatrix is based on the screensaver from The Matrix website. It shows text
-flying in and out in a terminal like as seen in "The Matrix" movie. It can
-scroll lines all at the same rate or asynchronously and at a user-defined
-speed.
+PMatrix is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix) — the
+"Matrix" rain screensaver for the terminal — with a built-in
+[Pomodoro](https://en.wikipedia.org/wiki/Pomodoro_Technique) timer wired into the
+animation:
 
-CMAtrix is inspired from 'The Matrix' movie. If you haven’t seen this movie and you are a fan of computers or sci-fi in general, go see this movie!!!
+- **Work phase** — the rain falls as usual, with a large block-digit countdown
+  (`POMODORO #N` + `MM:SS`) in the top-right corner.
+- **Break phase** — the rain freezes and a big centered `BREAK` banner with its
+  own countdown takes the screen, so you actually step away.
+- The cycle repeats, counting your pomodoros, until you quit.
 
-> :grey_exclamation:`Disclaimer` : We are in no way affiliated in any way with the movie "The Matrix", "Warner Bros" nor
-any of its affiliates in any way, just fans.
+Everything CMatrix could do (colors, bold, async scroll, lambda/rainbow modes,
+custom speed, screensaver mode, …) still works — the binary is just named
+`pmatrix`. Pass `-W 0` to disable the timer entirely and get plain rain.
+
+> :grey_exclamation: `Disclaimer`: Not affiliated with the movie "The Matrix",
+> Warner Bros, or any of its affiliates. Just fans.
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-## :open_file_folder: Build Dependencies
-You'll probably need a decent ncurses library to get this to work. On Windows, using mingw-w64-ncurses is recommended (PDCurses will also work, but it does not support colors or bold text).
-<br>
-##### :small_blue_diamond: For Linux<br>
-Run this command to check the version of ncurses.
+## :tomato: Pomodoro usage
+
+```sh
+pmatrix              # 25 min work / 5 min break (defaults)
+pmatrix -W 50 -R 10  # 50 min work / 10 min break
+pmatrix -W 0         # disable the timer (plain cmatrix-style rain)
 ```
+
+Keys while running:
+
+| Key | Work phase | Break phase |
+|---|---|---|
+| `space` / `p` / `P` | Pause — freezes the rain **and** the work clock (`PAUSED #N`) | Pause — freezes the break countdown (`P A U S E D`) |
+| `s` / `S` | Skip straight to the break | End the break early, start the next pomodoro |
+| `q` | Quit | Quit |
+
+All the original CMatrix runtime keys (`b`/`B`/`n` bold, `a` async, `1`–`9`
+speed, `!@#$%^&` colors, `r` rainbow, `m` lambda, …) still work too.
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+## :open_file_folder: Build dependencies
+
+You need a wide-character ncurses library. On Linux, check with:
+
+```sh
 ldconfig -p | grep ncurses
 ```
-If you get no output then you need to install ncurses. Click below to install ncurses in Linux.
-- [ncurses](https://www.cyberciti.biz/faq/linux-install-ncurses-library-headers-on-debian-ubuntu-centos-fedora/)
+
+If you get no output, install ncurses (e.g. `sudo apt install libncurses-dev`
+on Debian/Ubuntu). On Windows, `mingw-w64-ncurses` is recommended.
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-## :floppy_disk: Building and installing cmatrix
-To install cmatrix, Clone this repo in your local system and use either of the following methods from within the cmatrix directory.
+## :floppy_disk: Building and installing
 
-#### :small_blue_diamond: Using `configure` (recommended for most linux/mingw users)
+Clone the repo, then use either build system from inside the `pmatrix` directory.
+
+#### :small_blue_diamond: Using `configure` (recommended for most Linux/MinGW users)
 ```sh
-autoreconf -i  # skip if using released tarball
+autoreconf -i   # skip if building from a released tarball
 ./configure
 make
-make install
+sudo make install
 ```
 
 #### :small_blue_diamond: Using CMake
-Here we also show an out-of-source build in the sub directory "build".
-(Doesn't work on Windows, for now).
 ```sh
-mkdir -p build
-cd build
-# to install to "/usr/local"
-cmake ..
-# OR 
-# to install to "/usr"
-#cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+mkdir -p build && cd build
+cmake ..                              # installs to /usr/local
+# cmake -DCMAKE_INSTALL_PREFIX=/usr .. # ...or to /usr
 make
-make install
+sudo make install
 ```
 
-![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+Then just run:
 
-## :bookmark_tabs: Usage
-
-After you have installed **cmatrix** just type the command `cmatrix` to run it :)
 ```sh
-cmatrix
+pmatrix
 ```
-Run with different arguments to get different effects.
+
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+## :bookmark_tabs: All options
+
 ```sh
-cmatrix [-abBflohnsmVx] [-u update] [-C color]
-```
-Example:
-```sh
-cmatrix -ba -u 2 -C red
+pmatrix [-abBcfhlLnsmVxk] [-u delay] [-C color] [-t tty] [-M message] [-W mins] [-R mins]
 ```
 
-For more options and **help** run `cmatrix -h` <br>OR<br> Read Manual Page by running command `man cmatrix`
+| Flag | Meaning |
+|---|---|
+| `-W [mins]` | Pomodoro work duration (default 25, `0` disables the timer) |
+| `-R [mins]` | Pomodoro break duration (default 5) |
+| `-a` | Asynchronous scroll |
+| `-b` / `-B` | Bold characters / all-bold |
+| `-c` | Japanese characters (needs an appropriate font) |
+| `-l` | Linux mode (matrix console font) |
+| `-o` | Old-style scrolling |
+| `-s` | Screensaver mode (exits on first keystroke) |
+| `-u delay` | Screen update delay, `0`–`10` (default 4) |
+| `-C [color]` | Rain color (default green) |
+| `-r` / `-m` | Rainbow mode / lambda mode |
+| `-M [message]` | Print a message in the center of the screen |
+| `-V` | Version, `-h` help |
 
-_To get the program to look most like the movie, use `cmatrix -lba`_
-_To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`_
-
-> :round_pushpin: _Note: cmatrix is probably not particularly portable or efficient, but it won't hog
-**too** much CPU time._
-
-![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
-
-## :camera: Captures
-
-#### :small_blue_diamond: Screenshots
-
-<!-- ![Special Font & bold](data/img/capture_bold_font.png?raw=true "cmatrix -bx") -->
-<p align="center">
-<img src="./data/img/capture_bold_font.png" alt="cmatrix screenshot">
-</p>
-
-#### :small_blue_diamond: Screencasts
-
-<!-- ![Movie-Like Cast](data/img/capture_orig.gif?raw=true "cmatrix -xba") -->
-<p align="center">
-<img src="./data/img/capture_orig.gif" alt="cmatrix screencast">
-</p>
+For the full list run `pmatrix -h` or read `man pmatrix`.
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-## :zap: Maintainers
-- ➤ **Abishek V Ashok** [Core] - <abishekvashok@gmail.com><br> 
-<p align="center">
-  <a href="https://twitter.com/abishekvashok">
-    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white">
-  </a>
-  <a href="https://github.com/abishekvashok">
-    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
-  </a>
-</p>
+## :busts_in_silhouette: Credits
 
-
-## :busts_in_silhouette: Our Contributors
-#### :small_orange_diamond: Thanks to
-- ➤ **Chris Allegretta** <chrisa@asty.org> for writing cmatrix up in a fortnight and giving us
-  the responsibility to further improve it.
-- ➤ **Krisjon Hanson** and **Bjoern Ganslandt** for helping with bold support and
-  Bjoern again for the cursor removal code, helping with the `-u` and `-l`
-  modes/flags, and Makefile improvements.
-- ➤ **Adam Gurno** for multi-color support.
-- ➤ **Garrick West** for debian consolefont dir support.
-- ➤ **Nemo** for design thoughts and continuous help and support.
-- ➤ **John Donahue** for helping with transparent term support
-- ➤ **Ben Esacove** for Redhat 6 compatibility w/matrix.psf.gz
-- ➤ **jwz** for the xmatrix module to xscreensaver at http://www.jwz.org/xscreensaver.
-- Chris Allegretta's girlfriend **Amy** for not killing him when he stayed up till 3 AM
-  writing code.
-- ➤ **Sumit Kumar Soni** for beautifying the README.
-- The makers of the Matrix for one kickass movie!
-- ➤ Everyone who has sent (and who will send) us and Chris mails regarding
-  bugs, comments, patches or just a simple hello.
-- ➤ Everyone who has contributed to the project by opening issues and PRs on the github repository.
-
-![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
-
-## :book: Contribution Guide
-If you have any suggestions/flames/patches to send, please feel free to:
-- Open issues and if possible label them, so that it is easy to categorise features, bugs etc.
-- If you solved some problems or made some valuable changes, Please open a Pull Request on Github.
-- See [contributing.md](./CONTRIBUTING.md) for more details.
+PMatrix is built on top of [CMatrix](https://github.com/abishekvashok/cmatrix),
+written by **Chris Allegretta** and maintained by **Abishek V Ashok**, along with
+all of its contributors. All of their work — and the GPL-3.0 license — carries
+through here. Huge thanks to them; the pomodoro layer is just a thin addition on
+a great program.
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## :page_facing_up: License
-This software is provided under the GNU GPL v3. [View License](./COPYING)
 
+GNU GPL v3, same as the upstream CMatrix project. [View License](./COPYING)

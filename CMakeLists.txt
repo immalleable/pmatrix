@@ -69,7 +69,7 @@ add_executable(pmatrix pmatrix.c)
 target_link_libraries(pmatrix ${CURSES_LIBRARIES})
 
 install(TARGETS pmatrix DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES cmatrix.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+install(FILES pmatrix.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if     (UNIX)
 	foreach    (CONSOLE_FONTS_DIR ${CONSOLE_FONTS_DIRS})
